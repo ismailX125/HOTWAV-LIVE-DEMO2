@@ -6,20 +6,19 @@ import android.os.Handler;
 import android.view.View;
 import android.view.MotionEvent;
 import android.widget.VideoView;
+import android.widget.FrameLayout;
 import android.net.Uri;
+import android.os.Environment;
 import android.view.WindowManager;
+import android.media.MediaPlayer;
+import java.io.File;
 
 public class MainActivity extends Activity {
 
     VideoView video;
     Handler handler = new Handler();
 
-    Runnable returnToVideo = new Runnable() {
-        @Override
-        public void run() {
-            showVideo();
-        }
-    };
+    Runnable returnToVideo = () -> showVideo();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,22 +37,23 @@ public class MainActivity extends Activity {
 
     void hideBars() {
         getWindow().getDecorView().setSystemUiVisibility(
-            View.SYSTEM_UI_FLAG_FULLSCREEN |
-            View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
-            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY |
-            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
-            View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
-            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+            5894 | 1024 | 512
         );
     }
 
     void showVideo() {
-        video.setVideoURI(Uri.parse(
-            "android.resource://" + getPackageName() + "/" +
-            getResources().getIdentifier(
-                "demo", "raw", getPackageName()
-            )
-        ));
+
+        File folder = new File(
+            Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_MOVIES
+            ), "HOTWAV"
+        );
+
+        File file = new File(folder, "demo.mp4");
+
+        if (!file.exists()) return;
+
+        video.setVideoURI(Uri.fromFile(file));
 
         video.setOnPreparedListener(mp -> {
             mp.setLooping(true);
@@ -63,6 +63,7 @@ public class MainActivity extends Activity {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
+
         handler.removeCallbacks(returnToVideo);
 
         if (event.getAction() == MotionEvent.ACTION_UP) {
